@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("rentalCar");
     const carsCollection = db.collection("Cars");
@@ -60,7 +60,7 @@ async function run() {
         query.BookingEmail = email;
       }
       query.status = "Booked";
-
+      
       const result = await carsCollection.find(query).toArray();
       res.send(result);
     });
@@ -68,16 +68,23 @@ async function run() {
     app.patch("/carDetails/:id", async (req, res) => {
       const id = req.params.id;
       const updateData = req.body;
-      console.log("updated data ", updateData);
+
       const query = { _id: new ObjectId(id) };
 
-      if ((updateData.status = "Booked")) {
-        return  ;
-      } else {
-        const updateDoc = {
-          $set: updateData,
-        };
+      const existingCar = await carsCollection.find(query)
+      if(!existingCar){
+        return res.status(404).send({message: "Car not found"})
       }
+
+      if(existingCar.status === "Booked"){
+        return res.status(400).send({message: "car already booked"})
+      }
+      
+      const updateDoc = {
+        $set: updateData,
+      };
+
+      console.log("updated data ", updateDoc);
       const result = await carsCollection.updateOne(query, updateDoc);
       res.send(result);
     });
