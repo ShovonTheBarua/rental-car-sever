@@ -71,13 +71,14 @@ async function run() {
 
       const query = { _id: new ObjectId(id) };
 
-      const existingCar = await carsCollection.find(query)
+      const existingCar = await carsCollection.findOne(query)
       if(!existingCar){
         return res.status(404).send({message: "Car not found"})
       }
-
+      
       if(existingCar.status === "Booked"){
         return res.status(400).send({message: "car already booked"})
+        
       }
       
       const updateDoc = {
